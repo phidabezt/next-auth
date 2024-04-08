@@ -2,6 +2,7 @@
 
 import * as z from "zod"
 
+import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
@@ -19,8 +20,12 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { FormError } from "@/components/FormError"
 import { FormSuccess } from "../FormSuccess"
+import { login } from "@/actions/login"
 
 export const LoginForm = () => {
+  const [error, setError] = useState<string | undefined>("")
+  const [success, setSuccess] = useState<string | undefined>("")
+  const [isPending, startTransition] = useTransition()
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -30,7 +35,14 @@ export const LoginForm = () => {
   })
 
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-    console.log(values)
+    setError("")
+    setSuccess("")
+
+    startTransition(async () => {
+      const data = await login(values)
+      setError(data.error)
+      setSuccess(data.success)
+    })
   }
 
   return (
@@ -52,6 +64,7 @@ export const LoginForm = () => {
                   <FormControl>
                     <Input
                       {...field}
+                      disabled={isPending}
                       placeholder="phi.nguyen@example.com"
                       type="email"
                     />
@@ -69,6 +82,7 @@ export const LoginForm = () => {
                   <FormControl>
                     <Input
                       {...field}
+                      disabled={isPending}
                       placeholder="******"
                       type="password"
                     />
@@ -78,9 +92,9 @@ export const LoginForm = () => {
               )}
             />
           </div>
-          <FormError message=""/>
-          <FormSuccess message=""/>
-          <Button type="submit" className="w-full">
+          <FormError message={error} />
+          <FormSuccess message={success} />
+          <Button type="submit" className="w-full" disabled={isPending}>
             Login
           </Button>
         </form>
