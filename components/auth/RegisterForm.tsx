@@ -41,8 +41,8 @@ export const RegisterForm = () => {
 
     startTransition(async () => {
       const data = await register(values)
-      setError(data.error)
-      setSuccess(data.success)
+      setError(data?.error)
+      setSuccess(data?.success)
     })
   }
 
