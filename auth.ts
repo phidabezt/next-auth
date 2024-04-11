@@ -1,4 +1,5 @@
 import NextAuth from "next-auth"
+import type { UserRole } from "@prisma/client"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 
 import { db } from "@/lib/db"
@@ -18,7 +19,7 @@ export const {
       }
 
       if (token.role && session.user) {
-        session.user.role = token.role
+        session.user.role = token.role as UserRole
       }
 
       return session
@@ -29,7 +30,6 @@ export const {
       const existingUser = await getUserById(token.sub)
       if (!existingUser) return token
 
-      console.log("existingUser", existingUser)
       token.role = existingUser.role
       return token
     },
